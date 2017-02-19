@@ -22,16 +22,32 @@ module.exports = function(router){
 			if(err.errors != null){
 				if(err.errors.name)
 					res.json({ success:false,message: err.errors.name.message});
-				if(err.errors.email)
+				else if(err.errors.email)
 					res.json({ success:false,message: err.errors.email.message});
-				if(err.errors.username)
+				else if(err.errors.username)
 					res.json({ success:false,message: err.errors.username.message});
-				if(err.errors.password)
+				else if(err.errors.password)
 					res.json({ success:false,message: err.errors.password.message});
-			} /*else {
-					res.json({ success:false,message: err});
+				else
+					res.json({ success: false,message:err});
+			} else if(err){
+					if(err.code == 11000){
+						res.json({ success:false,message: 'email or username already taken'});
+						/*
+						if(err.errmsg[61] == "u")
+							res.json({ success: false , message:'The username is already taken'});
+						else if(err.errmsg[61] == "e")
+							res.json({ success: false , message:'The email is already taken'});
+					*/
+					}
+						
+					else
+						res.json({ success:false,message: err});
 
-			}*/
+			}
+					
+
+			
 		}
 		else
 			res.json({ success:true,message: 'User Created !'});

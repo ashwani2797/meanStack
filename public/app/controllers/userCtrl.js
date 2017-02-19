@@ -4,14 +4,14 @@ angular.module('userControllers',['userServices'])
 
 	var app = this;
 
-	this.regUser  = function(regData){
+	this.regUser  = function(regData , valid){
 		app.loading = true;
 		app.errorMsg = false;
 		app.successMsg = false;
 		console.log('form submitted');
 
-
-		User.create(app.regData).then(function(data){
+		if(valid){
+			User.create(app.regData).then(function(data){
 			console.log(data.data.success);
 			console.log(data.data.message);
 			if(data.data.success){
@@ -27,7 +27,12 @@ angular.module('userControllers',['userServices'])
 				app.loading = false;
 				app.errorMsg = data.data.message;
 			}
-		});
+			});
+		} else {
+			app.loading = false;
+			app.errorMsg = "Please ensure form is filled out properly";
+		}
+		
 	}
 })
 
