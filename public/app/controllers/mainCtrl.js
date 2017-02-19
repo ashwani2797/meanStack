@@ -1,6 +1,6 @@
 angular.module('mainController',['authServices'])
 
-.controller('mainCtrl',function(Auth,$timeout,$location,$rootScope){
+.controller('mainCtrl',function(Auth,$timeout,$location,$rootScope,$window){
 var app = this;
 
     app.loadme = false;
@@ -21,9 +21,26 @@ var app = this;
 				app.isLoggedIn = false; 
 				app.username = "";
 				app.email = ""; 
-			}	
+			}
+			if( $location.hash() == '_=_') $location.hash(null);	
 	});
+ 
+ 	this.facebook  = function(){
+ 		/*console.log($window.location.host);
+ 		console.log($window.location.protocol);*/
+ 		$window.location = $window.location.protocol + '//' +$window.location.host + '/auth/facebook';
+ 	}
+ 	this.twitter = function(){
+ 		/*console.log($window.location.host);
+ 		console.log($window.location.protocol);*/
+ 		$window.location = $window.location.protocol + '//' +$window.location.host + '/auth/twitter';
+ 	}
 
+ 	this.google = function(){
+ 		/*console.log($window.location.host);
+ 		console.log($window.location.protocol);*/
+ 		$window.location = $window.location.protocol + '//' +$window.location.host + '/auth/google';
+ 	}
 
 	this.doLogin  = function(loginData){
 		app.loading = true;

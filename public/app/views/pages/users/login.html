@@ -22,8 +22,10 @@
 		<br>
 		<br>
 	    <br><br>
-	  	<button class="btn btn-primary" type="submit">Login</button>
-	
+	  	<button class="btn btn-success" type="submit">Login</button>&nbsp;
+	  	<button type="button" class="btn btn-info" ng-click="main.twitter();">Twitter</button>
+	  	<button type="button" class="btn btn-danger" ng-click="main.google();">Google+</button>
+	  	<button type="button" class="btn btn-primary" ng-click="main.facebook();">Facebook</button>
 	</div>
 </form>
 <br>
@@ -41,6 +43,17 @@
 <br>
 <div class = "row show-hide-message" ng-show="main.errorMsg">
 	<div class="alert alert-danger"> {{main.errorMsg}}</div>
+</div>
+<div class = "row show-hide-message" ng-show="facebook.errorMsg">
+	<div class="alert alert-danger"> {{facebook.errorMsg}}</div>
+</div>
+
+<div class = "row show-hide-message" ng-show="twitter.errorMsg">
+	<div class="alert alert-danger"> {{twitter.errorMsg}}</div>
+</div>
+
+<div class = "row show-hide-message" ng-show="google.errorMsg">
+	<div class="alert alert-danger"> {{google.errorMsg}}</div>
 </div>
 <br><br><br><br><br><br><br><br>
 </div>  

@@ -10,16 +10,29 @@ module.exports = function(router){
 	user.username = req.body.username;
 	user.password = req.body.password;
 	user.email = req.body.email;
+	user.name = req.body.name; 
 	//console.log(req.body);
 
-	if( req.body.username == null || req.body.username == '' || req.body.email == null || req.body.email == '' || req.body.password == null || req.body.password == '' ){
+	if( req.body.username == null || req.body.username == '' || req.body.email == null || req.body.email == '' || req.body.password == null || req.body.password == '' || req.body.name == null || req.body.name == ''  ){
 			res.json({ success:false,message: 'Ensure that username , email and password is provided'});
 	}
 	else{
 	user.save(function(err){
-		if(err)
-			res.json({ success:false,message: 'Username or email alread exist'});
+		if(err){
+			if(err.errors != null){
+				if(err.errors.name)
+					res.json({ success:false,message: err.errors.name.message});
+				if(err.errors.email)
+					res.json({ success:false,message: err.errors.email.message});
+				if(err.errors.username)
+					res.json({ success:false,message: err.errors.username.message});
+				if(err.errors.password)
+					res.json({ success:false,message: err.errors.password.message});
+			} /*else {
+					res.json({ success:false,message: err});
 
+			}*/
+		}
 		else
 			res.json({ success:true,message: 'User Created !'});
 		});
@@ -70,7 +83,7 @@ module.exports = function(router){
 		}
 
 	});
-
+  
 	router.post('/me',function(req,res){
 		res.send(req.decoded);
 	})

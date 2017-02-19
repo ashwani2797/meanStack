@@ -4,10 +4,17 @@
 </div>
 <form ng-submit="register.regUser(regData);">
 	<div>
+		<!-- Name -->
+		<label class="control-label col-sm-2" >Name:</label>
+	 	<div class="col-sm-10">
+		<input class="form-control" type="text" name="name" placeholder="please enter Name" ng-model="register.regData.name">
+		</div>
+		<br>
+		<br>
 	<!-- Email -->
 		<label class="control-label col-sm-2" >Email:</label>
 	 	<div class="col-sm-10">
-		<input class="form-control" type="email" name="email" placeholder="please enter email" ng-model="register.regData.email">
+		<input class="form-control" type="text" name="email" placeholder="please enter email" ng-model="register.regData.email">
 		</div>
 		<br>
 		<br>

@@ -1,4 +1,4 @@
- angular.module('authServices',[])
+  angular.module('authServices',[])
 
 .factory('Auth', function($http,AuthToken){
 	var authFactory = {};
@@ -18,6 +18,12 @@
 		else
 			return false;
 	};
+
+	//Auth.facebook(token);
+	authFactory.facebook = function(token) {
+			AuthToken.setToken(token);
+	};
+
 
 	//Auth.getUser();
 	authFactory.getUser = function(){
