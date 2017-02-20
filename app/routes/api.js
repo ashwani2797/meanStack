@@ -56,6 +56,36 @@ module.exports = function(router){
 	}
 
 });
+
+	//For checking available username 
+	//http://Localhost:8085/api/checkusername
+	router.post('/checkusername',function(req,res){
+		//res.send(req.body.username);
+		User.findOne({ username:req.body.username}).select('username ').exec(function(err,user){
+			if(err) throw err;
+			if(user){
+				res.json({ success:false , message: 'The username already taken'});
+			} else {
+				res.json({ success:true , message:'Valid username'});
+			}
+			
+		})
+	});
+
+		//For checking email
+	//http://Localhost:8085/api/checkemail
+	router.post('/checkemail',function(req,res){
+		//res.send(req.body.username);
+		User.findOne({email:req.body.email}).select('email').exec(function(err,user){
+			if(err) throw err;
+			if(user){
+				res.json({ success:false , message: 'The email already taken'});
+			} else {
+				res.json({ success:true , message:'Valid email'});
+			}
+			
+		})
+	});
 	//User LOGIN ROUTE
 	//http://Localhost:8085/api/authenticate
 	router.post('/authenticate',function(req,res){
