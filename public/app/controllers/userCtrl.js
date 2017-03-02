@@ -5,6 +5,7 @@ angular.module('userControllers',['userServices'])
 	var app = this;
 
 	this.regUser  = function(regData , valid){
+		app.disabled = true;
 		app.loading = true;
 		app.errorMsg = false;
 		app.successMsg = false;
@@ -24,11 +25,13 @@ angular.module('userControllers',['userServices'])
 				}, 2000);
 				
 			} else {
+				app.disabled = false;
 				app.loading = false;
 				app.errorMsg = data.data.message;
 			}
 			});
 		} else {
+			app.disabled = false;
 			app.loading = false;
 			app.errorMsg = "Please ensure form is filled out properly";
 		}
@@ -101,9 +104,15 @@ angular.module('userControllers',['userServices'])
 
 .controller('facebookCtrl',function($routeParams,Auth,$location,$window){
 	var app = this;
+    app.expired = false;
+    app.disabled = true;
 
 	if($window.location.pathname == '/facebookerror'){
 		app.errorMsg = 'facebook email not found in database';
+
+	}else if($window.location.pathname == '/facebook/inactive/error'){
+		    app.expired = true;
+			app.errorMsg = 'Account not yet activated, Check your email for activation link';
 
 	}else{
 		Auth.facebook($routeParams.token);
@@ -115,9 +124,15 @@ angular.module('userControllers',['userServices'])
 
 .controller('twitterCtrl',function($routeParams,Auth,$location,$window){
 	var app = this;
+	 app.expired = false;
+	 app.disabled = true;
 
 	if($window.location.pathname == '/twittererror'){
 		app.errorMsg = 'twitter email not found in database';
+
+	}else if($window.location.pathname == '/twitter/inactive/error'){
+			app.expired = true;
+			app.errorMsg = 'Account not yet activated, Check your email for activation link';
 
 	}else{
 		Auth.facebook($routeParams.token);
@@ -129,9 +144,15 @@ angular.module('userControllers',['userServices'])
 
 .controller('googleCtrl',function($routeParams,Auth,$location,$window){
 	var app = this;
+    app.expired = false;
+ 	app.disabled = true;
 
 	if($window.location.pathname == '/googleerror'){
 		app.errorMsg = 'google email not found in database';
+
+	}else if($window.location.pathname == '/google/inactive/error'){
+		    app.expired = true;
+			app.errorMsg = 'Account not yet activated, Check your email for activation link';
 
 	}else{
 		Auth.facebook($routeParams.token);

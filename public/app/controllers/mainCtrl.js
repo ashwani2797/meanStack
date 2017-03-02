@@ -28,17 +28,20 @@ var app = this;
  	this.facebook  = function(){
  		/*console.log($window.location.host);
  		console.log($window.location.protocol);*/
+ 		app.disabled = true;
  		$window.location = $window.location.protocol + '//' +$window.location.host + '/auth/facebook';
  	}
  	this.twitter = function(){
  		/*console.log($window.location.host);
  		console.log($window.location.protocol);*/
+ 		app.disabled = true;
  		$window.location = $window.location.protocol + '//' +$window.location.host + '/auth/twitter';
  	}
 
  	this.google = function(){
  		/*console.log($window.location.host);
  		console.log($window.location.protocol);*/
+ 		app.disabled = true;
  		$window.location = $window.location.protocol + '//' +$window.location.host + '/auth/google';
  	}
 
@@ -46,6 +49,8 @@ var app = this;
 		app.loading = true;
 		app.errorMsg = false;
 		app.successMsg = false;
+		app.expired = false;
+		app.disabled = true;
 		console.log('form submitted');
 
 
@@ -66,8 +71,19 @@ var app = this;
 				}, 2000);
 				
 			} else {
-				app.loading = false;
-				app.errorMsg = data.data.message;
+
+				if(data.data.expired){
+					app.expired = true;
+					app.loading = false;
+					app.errorMsg = data.data.message;	
+
+				} else{
+					app.disabled = false;
+					app.loading = false;
+					app.errorMsg = true;
+					app.errorMsg = data.data.message;	
+				}
+				
 			}
 		});
 	}

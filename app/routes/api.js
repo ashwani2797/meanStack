@@ -1,7 +1,22 @@
-var User = require('../models/user');
-var jwt  = require('jsonwebtoken');
-var secret = 'harrypotter';
-module.exports = function(router){
+var User        = require('../models/user');
+var jwt         = require('jsonwebtoken');
+var secret      = 'harrypotter';
+var nodemailer  = require('nodemailer');
+var sgTransport = require('nodemailer-sendgrid-transport');
+module.exports  = function(router){
+
+
+
+var options = {
+  auth: {
+    api_user: 'ashwani2797',
+    api_key: 'SendGrid!2797'
+  }
+}
+
+var client = nodemailer.createTransport(sgTransport(options));
+
+
 	//USER REGESTRATION ROUTE
 	//http://localhost:8085/api/users
 	router.post('/users', function(req , res){
@@ -11,6 +26,8 @@ module.exports = function(router){
 	user.password = req.body.password;
 	user.email = req.body.email;
 	user.name = req.body.name; 
+	user.temporarytoken = jwt.sign({ username : user.username , email : user.email },secret,{expiresIn:'24h'});
+
 	//console.log(req.body);
 
 	if( req.body.username == null || req.body.username == '' || req.body.email == null || req.body.email == '' || req.body.password == null || req.body.password == '' || req.body.name == null || req.body.name == ''  ){
@@ -49,8 +66,27 @@ module.exports = function(router){
 
 			
 		}
-		else
-			res.json({ success:true,message: 'User Created !'});
+		else{
+			var email = {
+				  from: 'Localhost Staff, staff@localhost.com',
+				  to: user.email,
+				  subject: 'Activation Link',
+				  text: 'Hello' +user.name +'Thanks for registering at localhost.com. Please click on the link below to complete your activation: http://localhost:8085/activate/'+ user.temporarytoken,
+				  html: 'Hello<strong>' +user.name +'</strong>,<br><br>Thanks for registering at localhost.com. Please click on the link below to complete your activation:<br><a href="http://localhost:8085/activate/'+ user.temporarytoken+'">http://localhost:8085/activate/</a>'
+				};
+
+				client.sendMail(email, function(err, info){
+				    if (err ){
+				      console.log(err);
+				    }
+				    else {
+				      console.log('Message sent: ' + info.response);
+				    }
+				});
+			res.json({ success:true,message: 'Account registered!Please check your email for activation link.'});
+
+
+			}
 		});
 
 	}
@@ -90,7 +126,7 @@ module.exports = function(router){
 	//http://Localhost:8085/api/authenticate
 	router.post('/authenticate',function(req,res){
 		//res.send(req.body.username);
-		User.findOne({ username:req.body.username}).select('email username password').exec(function(err,user){
+		User.findOne({ username:req.body.username}).select('email username password active').exec(function(err,user){
 			if(err) throw err;
 			if(!user){ 
 				res.json({success:false,message:'Could not authenticate user'});
@@ -99,7 +135,9 @@ module.exports = function(router){
 					var validPassword = user.comparePassword(req.body.password);
 					if(!validPassword)
 					res.json({success: false ,message:'Could Not authenticate password'});
-					else{
+					else if(!user.active){
+						res.json({success: false ,message:'Account not yet activated, Check your email for activation link', expired : true});
+					} else{
 						var token = jwt.sign({ username : user.username , email : user.email },secret,{expiresIn:'24h'});
 					    res.json({success:true,message:'User authenticated',token:token});
 
@@ -110,6 +148,113 @@ module.exports = function(router){
 			}
 		})
 	});
+
+	router.put('/activate/:token',function(req,res){
+		User.findOne({temporarytoken : req.params.token}, function( err,user){
+			if(err) throw err;
+			var token = req.params.token;
+
+
+			jwt.verify(token,secret,function(err,decoded){
+				if(err){
+					res.json({success:false,message :'Activation Link Expired'});
+				} else if(!user) {
+					res.json({success:false,message :'Activation Link Expired'});
+
+				} else {
+					user.temporarytoken = false;
+					user.active =true;
+					user.save(function(err){
+						if(err){
+							console.log(err);
+						}else{
+
+							var email = {
+								  from: 'Localhost Staff, staff@localhost.com',
+								  to: user.email,
+								  subject: 'Localhost account activated',
+								  text: 'Hello' +user.name +'Your account has been successfully activated',
+								  html: 'Hello<strong>' +user.name +'</strong><br><br><br>Your account has been successfully activated'
+								};
+
+								client.sendMail(email, function(err, info){
+								    if (err ){
+								      console.log(err);
+								    }
+								    else {
+								      console.log('Message sent: ' + info.response);
+								    }
+								});
+							res.json({ success: true , message:'Account activated'});
+						}
+					});
+
+				}
+
+			});
+		})
+	})
+
+
+
+router.post('/resend',function(req,res){
+		//res.send(req.body.username);
+		User.findOne({ username:req.body.username}).select('username password active').exec(function(err,user){
+			if(err) throw err;
+			if(!user){ 
+				res.json({success:false,message:'Could not authenticate user'});
+			}else if(user){
+				if(req.body.password){
+					var validPassword = user.comparePassword(req.body.password);
+					if(!validPassword)
+					res.json({success: false ,message:'Could Not authenticate password'});
+					else if(user.active){
+						res.json({success: false ,message:'Account is already activated'});
+					}  else {
+					res.json({ success:true , user : user});
+				}
+			}
+			}
+		})
+	});
+
+router.put('/resend',function(req,res){
+	User.findOne({ username:req.body.username}).select('name email temporarytoken username').exec(function(err,user){
+		if(err) throw err;
+		user.temporarytoken = jwt.sign({ username : user.username , email : user.email },secret,{expiresIn:'24h'});
+		user.save(function(err){
+			if(err){
+				console.log(err);
+			} else {
+				var email = {
+				  from: 'Localhost Staff, staff@localhost.com',
+				  to: user.email,
+				  subject: 'Activation Link request',
+				  text: 'Hello' +user.name +'You recently requested a new activation Link. Please click on the link below to complete your activation: http://localhost:8085/activate/'+ user.temporarytoken,
+				  html: 'Hello<strong>' +user.name +'</strong>,<br><br>You recently requested a new activation Link. Please click on the link below to complete your activation:<br><a href="http://localhost:8085/activate/'+ user.temporarytoken+'">http://localhost:8085/activate/</a>'
+				};
+
+				client.sendMail(email, function(err, info){
+				    if (err ){
+				      console.log(err);
+				    }
+				    else {
+				      console.log('Message sent: ' + info.response);
+				    }
+				});
+				res.json({success:true , message:'Activation Link has been send to ' + user.email +'!' });
+			}
+		});
+
+	})
+});
+
+
+
+
+
+
+
 
 	router.use(function(req,res,next){
 		var token = req.body.token || req.body.query || req.headers['x-access-token'];
