@@ -2,19 +2,15 @@ var User        = require('../models/user');
 var jwt         = require('jsonwebtoken');
 var secret      = 'harrypotter';
 var nodemailer  = require('nodemailer');
-var sgTransport = require('nodemailer-sendgrid-transport');
 module.exports  = function(router){
 
-
-
-var options = {
-  auth: {
-    api_user: 'ashwani2797',
-    api_key: 'SendGrid!2797'
-  }
-}
-
-var client = nodemailer.createTransport(sgTransport(options));
+var transport = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: "fcashwani2797@gmail.com",
+        pass: "Demo@localhost"
+    }
+});
 
 
 	//USER REGESTRATION ROUTE
@@ -67,22 +63,24 @@ var client = nodemailer.createTransport(sgTransport(options));
 			
 		}
 		else{
-			var email = {
-				  from: 'Localhost Staff, staff@localhost.com',
+
+				var message = {
+ 				  from: 'Localhost Staff, staff@localhost.com',
 				  to: user.email,
 				  subject: 'Activation Link',
 				  text: 'Hello' +user.name +'Thanks for registering at localhost.com. Please click on the link below to complete your activation: http://localhost:8085/activate/'+ user.temporarytoken,
-				  html: 'Hello<strong>' +user.name +'</strong>,<br><br>Thanks for registering at localhost.com. Please click on the link below to complete your activation:<br><a href="http://localhost:8085/activate/'+ user.temporarytoken+'">http://localhost:8085/activate/</a>'
-				};
+				  html: 'Hello<strong>' +user.name +'</strong>,<br><br>Thanks for registering at localhost.com. Please click on the link below to complete your activation:<br><a href="http://localhost:8085/activate/'+ user.temporarytoken+'">http://localhost:8085/activate/</a>',
+				}
+				console.log('Sending Mail');
+				transport.sendMail(message, function(error){
+				if(error){
+				  console.log('Error occured');
+				  console.log(error.message);
+				  return;
+				}
+				console.log('Message sent successfully!');
+			});
 
-				client.sendMail(email, function(err, info){
-				    if (err ){
-				      console.log(err);
-				    }
-				    else {
-				      console.log('Message sent: ' + info.response);
-				    }
-				});
 			res.json({ success:true,message: 'Account registered!Please check your email for activation link.'});
 
 
@@ -169,22 +167,22 @@ var client = nodemailer.createTransport(sgTransport(options));
 							console.log(err);
 						}else{
 
-							var email = {
-								  from: 'Localhost Staff, staff@localhost.com',
+								var message = {
+				 				  from: 'Localhost Staff, staff@localhost.com',
 								  to: user.email,
 								  subject: 'Localhost account activated',
 								  text: 'Hello' +user.name +'Your account has been successfully activated',
-								  html: 'Hello<strong>' +user.name +'</strong><br><br><br>Your account has been successfully activated'
-								};
-
-								client.sendMail(email, function(err, info){
-								    if (err ){
-								      console.log(err);
-								    }
-								    else {
-								      console.log('Message sent: ' + info.response);
-								    }
-								});
+								  html: 'Hello<strong>' +user.name +'</strong><br><br><br>Your account has been successfully activated',
+								}
+								console.log('Sending Mail');
+								transport.sendMail(message, function(error){
+								if(error){
+								  console.log('Error occured');
+								  console.log(error.message);
+								  return;
+								}
+								console.log('Message sent successfully!');
+							});
 							res.json({ success: true , message:'Account activated'});
 						}
 					});
@@ -226,21 +224,22 @@ router.put('/resend',function(req,res){
 			if(err){
 				console.log(err);
 			} else {
-				var email = {
-				  from: 'Localhost Staff, staff@localhost.com',
-				  to: user.email,
-				  subject: 'Activation Link request',
-				  text: 'Hello' +user.name +'You recently requested a new activation Link. Please click on the link below to complete your activation: http://localhost:8085/activate/'+ user.temporarytoken,
-				  html: 'Hello<strong>' +user.name +'</strong>,<br><br>You recently requested a new activation Link. Please click on the link below to complete your activation:<br><a href="http://localhost:8085/activate/'+ user.temporarytoken+'">http://localhost:8085/activate/</a>'
-				};
 
-				client.sendMail(email, function(err, info){
-				    if (err ){
-				      console.log(err);
-				    }
-				    else {
-				      console.log('Message sent: ' + info.response);
-				    }
+					var message = {
+	 				  from: 'Localhost Staff, staff@localhost.com',
+					  to: user.email,
+					  subject: 'Activation Link request',
+					  text: 'Hello' +user.name +'You recently requested a new activation Link. Please click on the link below to complete your activation: http://localhost:8085/activate/'+ user.temporarytoken,
+					  html: 'Hello<strong>' +user.name +'</strong>,<br><br>You recently requested a new activation Link. Please click on the link below to complete your activation:<br><a href="http://localhost:8085/activate/'+ user.temporarytoken+'">http://localhost:8085/activate/</a>'
+					}
+					console.log('Sending Mail');
+					transport.sendMail(message, function(error){
+					if(error){
+					  console.log('Error occured');
+					  console.log(error.message);
+					  return;
+					}
+					console.log('Message sent successfully!');
 				});
 				res.json({success:true , message:'Activation Link has been send to ' + user.email +'!' });
 			}
