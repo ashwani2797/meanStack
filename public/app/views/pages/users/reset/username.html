@@ -1,0 +1,41 @@
+<div>
+<div class="page-header">
+	<h1>ForgotUsername</h1>
+</div>
+<form name="userForm" ng-submit="username.sendUsername(userData , userForm.$valid);" novalidate>
+	<div>
+	
+		<br>
+		<!-- Email -->
+		<label class="control-label col-sm-2" >Email:</label>
+	 	<div class="col-sm-10">
+		<input ng-disabled="username.disabled || facebook.disabled || google.disabled || twitter.disabled" class="form-control" type="text" name="email" placeholder="Please enter email" ng-model="username.userData.email"  ng-pattern="/^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/" ng-minlength="3" ng-maxlength="50"  autocomplete="off" required>
+		</div>
+
+	    <br><br>
+	  	<button ng-disabled="username.disabled || facebook.disabled || google.disabled || twitter.disabled" class="btn btn-success" type="submit">Submit</button>&nbsp;
+	 
+
+
+	</div>
+</form>
+<br>
+
+<div class="jumbotron text-center" ng-show="username.loading">
+	<span class="glyphicon glyphicon-repeat spinner"></span>
+	<p>Loading...</p>
+</div>
+
+<br>
+
+<div class = "row show-hide-message" ng-show="username.successMsg">
+	<div class="alert alert-success"> {{username.successMsg}}</div>
+</div>
+<br>
+<div class = "row show-hide-message" ng-show="username.errorMsg">
+	<div class="alert alert-danger"> {{username.errorMsg}} &nbsp; <a href='/resend' ng-show="username.expired"><button type="button" class="btn btn-primary">Resend activation link</button></a>
+</div>
+</div>
+
+<br><br><br><br><br><br><br><br>
+</div>  

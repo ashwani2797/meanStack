@@ -248,8 +248,152 @@ router.put('/resend',function(req,res){
 	})
 });
 
+router.get('/resetusername/:email',function(req,res){
+
+	User.findOne({email:req.params.email }).select('email username name').exec(function(err,user){
+		if(err){
+			res.json({ success:false , message:err});
+		} else {
+					if( !req.params.email ){
+					res.json({ success:false , message:"No E-mail was provided" });
+
+				} else {
+			if(!user){
+				res.json({ success:false , message:"E-mail was not found" });
+	
+			} else{
+
+					var message = {
+		 				  from: 'Localhost Staff, staff@localhost.com',
+						  to: user.email,
+						  subject: 'Localhost username requested',
+						  text: 'Hello' +user.name +'You recently requested a username. Please save it in your files :'+user.username,
+						  html: 'Hello<strong>' +user.name +'</strong>,<br><br>You recently requested a username. Please save it in your files :'+user.username,
+						}
+						console.log('Sending Mail');
+						transport.sendMail(message, function(error){
+						if(error){
+						  console.log('Error occured');
+						  console.log(error.message);
+						  return;
+						}
+						console.log('Message sent successfully!');
+				});
 
 
+
+				res.json({ success:true , message:"Username has been send to email!" });
+			
+			}
+		}
+		}
+	}); 
+});
+
+
+router.put('/resetpassword',function(req,res){
+
+	User.findOne({ username : req.body.username}).select('username active email name resettoken' ).exec(function(err,user){
+		if(err) throw err;
+		if(!user) {
+			res.json({ success:false ,message:'Username was not found'});
+		} else if( !user.active ){
+			res.json({ success:false ,message:'Account has not been yet activated'});
+
+		} else {
+			user.resettoken = jwt.sign({ username : user.username , email : user.email },secret,{expiresIn:'24h'});
+			user.save(function(err){
+				if(err){
+			res.json({ success:false ,message:err });
+				} else {
+					var message = {
+	 				  from: 'Localhost Staff, staff@localhost.com',
+					  to: user.email,
+					  subject: 'Localhost reset password request',
+					  text: 'Hello' +user.name +'You recently requested a Password reset. Please click on the link below to reset your password: http://localhost:8085/reset/'+ user.resettoken,
+					  html: 'Hello<strong>' +user.name +'</strong>,<br><br>You recently requested a a Password reset. Please click on the link below to reset your password:<br><a href="http://localhost:8085/reset/'+ user.resettoken+'">http://localhost:8085/newpassword/</a>'
+					}						
+					    console.log('Sending Mail');
+						transport.sendMail(message, function(error){
+						if(error){
+						  console.log('Error occured');
+						  console.log(error.message);
+						  return;
+						}
+						console.log('Message sent successfully!');
+				});
+
+					res.json({ success:true ,message:'Check your email for password reset link'});
+
+				}
+			})
+
+		}
+	})
+
+});
+
+router.get('/resetpassword/:token',function(req,res){
+	User.findOne({ resettoken: req.params.token }).select().exec(function(err,user){
+		if(err) throw err;
+		var token = req.params.token;
+		//function to verify them
+		jwt.verify(token,secret,function(err,decoded){
+				if(err){
+					res.json({success:false,message :'The password link has expired.'});
+				} else { 
+					if(!user) {
+						res.json({ success:false , message: 'The password link has expired '});
+
+					} else 
+					res.json({ success:true , user :user});
+
+				}
+			});
+		});
+
+});	
+
+
+router.put('/savepassword', function(req,res){
+	User.findOne({ username: req.body.username}).select('username email name password resettoken').exec(function(err,user){
+		if(err) throw err;
+		if( req.body.password == null || req.body.password == ""){
+			res.json({success:false ,message : 'password is not provided'});
+
+		}else{
+		user.password =req.body.password;
+		user.resettoken = false;
+		user.save(function(err){
+			if(err) res.json({ success:false , message:err });
+			else {
+
+				var message = {
+		 				  from: 'Localhost Staff, staff@localhost.com',
+						  to: user.email,
+						  subject: 'Localhost reset password',
+						  text: 'Hello' +user.name +'This email is to notified you that your password is recently changed at localhost.com',
+						  html: 'Hello<strong>' +user.name +'</strong>,<br><br>YThis email is to notified you that your password is recently changed at localhost.com',
+						}
+						console.log('Sending Mail');
+						transport.sendMail(message, function(error){
+						if(error){
+						  console.log('Error occured');
+						  console.log(error.message);
+						  return;
+						}
+						console.log('Message sent successfully!');
+				});
+
+
+				res.json({ success:true , message :'password is successfully changed'})
+			}
+			});
+
+		}
+
+	});
+})
 
 
 
