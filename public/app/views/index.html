@@ -41,6 +41,7 @@
      <script type="text/javascript" src="app/controllers/userCtrl.js"></script>
      <script type="text/javascript" src="app/controllers/mainCtrl.js"></script>
       <script src="app/controllers/emailCtrl.js"></script>
+      <script src="app/controllers/managementCtrl.js"></script>
 
      <!-- Angular Services -->
      <script type="text/javascript" src="app/services/userServices.js"></script>
@@ -83,6 +84,7 @@
               </ul>
             </li>
             <li><a href="#" ng-show="main.isLoggedIn" ng-click="main.logout();">Logout</a></li>
+            <li><a href="/management" ng-show="main.isLoggedIn && main.authorized">Management</a></li>
             <li><a href="/profile" ng-show="main.isLoggedIn">{{ main.username }}</a></li>
           </ul>
         </div><!--/.nav-collapse -->
@@ -98,14 +100,40 @@
       </div>
 
       <div ng-view></div>
-     
+
+<!-- Bootstrap model -->
+      <div class="container">
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" ng-click="main.endSession();"data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">{{ main.modalHeader }}</h4>
+        </div>
+        <div class="modal-body">
+          <p>{{ main.modalBody}}</p>
+          <div ng-show="main.hideButtons" class="dizzy-gillespie"></div>
+        </div>
+        <div class="modal-footer" >
+          <button type="button" ng-hide="main.hideButtons" class="btn btn-primary"ng-click="main.renewSession();" data-dismiss="modal">Yes</button>
+          <button type="button" ng-hide="main.hideButtons" class="btn btn-danger" ng-click="main.endSession();" data-dismiss="modal">No</button>
+
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+
     </div> <!-- /container -->
 
   <script type="text/javascript" src="assets/js/jquery-3.1.1.min.js"></script>
    <script src="assets/js/bootstrap.js"></script>
-
-
-
- 
+   
   </body>
 </html>
